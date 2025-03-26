@@ -24,8 +24,9 @@ void UartLogComponent::setup() {
   // On ESP8266, Serial1 TX is fixed so we simply begin with the baud rate.
   this->uart_->begin(this->baud_rate);
 #endif
-  // Optional: send an initial message.
+  // Send an initial message on UART and print to logger.
   this->uart_->println("UART Log started");
+  ESP_LOGI(TAG, "UART Log started on TX pin %d with baud %d", this->tx_pin, this->baud_rate);
 
 #ifdef USE_LOGGER
   if (logger::global_logger != nullptr) {
@@ -35,7 +36,6 @@ void UartLogComponent::setup() {
       std::string final_message;
       if (this->strip_colors) {
         std::string org_msg(message);
-        // Similar to the syslog component, remove the color escape sequences if present.
         if (org_msg.size() > 11)
           final_message = org_msg.substr(7, org_msg.size() - 11);
         else
