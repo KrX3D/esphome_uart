@@ -21,7 +21,8 @@ CONFIG_SCHEMA = cv.All(
         cv.GenerateID(): cv.declare_id(UartLogComponent),
         cv.Optional(CONF_ENABLE_UART_LOG, default=True): cv.boolean,
         cv.Optional(CONF_BAUD_RATE, default=115200): cv.positive_int,
-        cv.Optional(CONF_TX_PIN, default=1): cv.pin,
+        # Replace cv.pin with an integer range validator
+        cv.Optional(CONF_TX_PIN, default=1): cv.int_range(min=0, max=40),
         cv.Optional(CONF_STRIP_COLORS, default=True): cv.boolean,
         cv.Optional(CONF_MIN_LEVEL, default="DEBUG"): is_log_level,
     }),
