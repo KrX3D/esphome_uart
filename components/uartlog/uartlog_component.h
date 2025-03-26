@@ -23,7 +23,7 @@ class UartLogComponent : public Component {
   // Component methods
   void setup() override;
   void loop() override;
-  float get_setup_priority() const override { return setup_priority::AFTER_LOGGER; }
+  float get_setup_priority() const override { return setup_priority::AFTER_WIFI; }
 
   // Setters for configuration options
   void set_baud_rate(uint32_t baud_rate) { this->baud_rate = baud_rate; }
