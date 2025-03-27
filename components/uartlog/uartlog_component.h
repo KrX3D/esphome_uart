@@ -3,6 +3,7 @@
 #define UARTLOG_COMPONENT_H_
 
 #include "esphome/core/component.h"
+#include "esphome/components/switch/switch.h"
 #include "esphome/core/defines.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/log.h"
@@ -24,6 +25,7 @@ class UartLogComponent : public Component {
   void setup() override;
   void loop() override;
   float get_setup_priority() const override { return setup_priority::AFTER_WIFI; }
+  void dump_config() override;
 
   // Setters for configuration options
   void set_baud_rate(uint32_t baud_rate) { this->baud_rate = baud_rate; }
