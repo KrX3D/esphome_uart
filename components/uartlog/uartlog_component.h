@@ -32,6 +32,7 @@ class UartLogComponent : public Component {
   void set_baud_rate(uint32_t baud_rate) { this->baud_rate = baud_rate; }
   void set_tx_pin(uint8_t tx_pin) { this->tx_pin = tx_pin; }
   void set_strip_colors(bool strip) { this->strip_colors = strip; }
+  void set_min_log_level(int log_level) { this->min_log_level = log_level; }
 
   // Optionally, if you want to ignore the min_level filtering
   void set_always_full_logs(bool always) { this->always_full_logs = always; }
