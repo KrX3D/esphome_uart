@@ -41,12 +41,3 @@ def to_code(config):
 UARTLOG_SWITCH_SCHEMA = cv.Schema({
     cv.Required(CONF_ID): cv.use_id(UartLogComponent),
 })
-
-@switch.register_switch('uartlog_switch', UARTLOG_SWITCH_SCHEMA)
-def uartlog_switch_to_code(config, key, template_args):
-    # Get the parent uartlog component.
-    parent = yield cg.get_variable(config[CONF_ID])
-    # Create a new PVariable for the switch. We append a suffix to create a unique id.
-    var = cg.new_Pvariable(config[CONF_ID] + "_switch", parent)
-    cg.add(var.set_parent(parent))
-    yield var
