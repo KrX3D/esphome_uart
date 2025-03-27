@@ -25,6 +25,7 @@ class UartLogComponent : public Component {
   void setup() override;
   void loop() override;
   void log(uint8_t level, const std::string &tag, const std::string &payload);
+  void dump_config() override;
 
   // Setters to configure the component
   void set_enable_uart_log(bool en) { this->enable_uart_log = en; }
