@@ -22,7 +22,7 @@ UartLogAction = uartlog_ns.class_("UartLogAction", cg.Component)
 # The configuration schema for the UART log component.
 CONFIG_SCHEMA = cv.All(
     cv.Schema({
-        cv.GenerateID(): cv.declare_id(UartLogComponent),
+        "id": cv.declare_id(UartLogComponent),
         cv.Optional(CONF_ENABLE_UART_LOG, default=True): cv.boolean,
         cv.Optional(CONF_BAUD_RATE, default=115200): cv.positive_int,
         cv.Optional(CONF_TX_PIN, default=1): cv.int_range(min=0, max=40),
