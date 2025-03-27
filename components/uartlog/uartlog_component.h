@@ -4,9 +4,6 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/defines.h"
-#ifdef USE_SWITCH
-#include "esphome/components/switch/switch.h"
-#endif
 
 #ifdef ESP32
   #include "HardwareSerial.h"
@@ -26,7 +23,7 @@ class UartLogComponent : public Component {
   void loop() override;
   void log(uint8_t level, const std::string &tag, const std::string &payload);
 
-  // Setters to configure the component
+  // Setters for configuration options
   void set_enable_uart_log(bool en) { this->enable_uart_log = en; }
   void set_baud_rate(uint32_t baud_rate) { this->baud_rate = baud_rate; }
   void set_tx_pin(uint8_t tx_pin) { this->tx_pin = tx_pin; }
@@ -47,21 +44,6 @@ class UartLogComponent : public Component {
   HardwareSerial *uart_{&Serial1};
 #endif
 };
-
-#ifdef USE_SWITCH
-class UartLogSwitch : public switch_::Switch, public Component {
- public:
-  void set_parent(UartLogComponent *parent) { this->parent_ = parent; }
-  void write_state(bool state) override {
-    if (this->parent_ != nullptr) {
-      this->parent_->set_enable_uart_log(state);
-    }
-    publish_state(state);
-  }
- protected:
-  UartLogComponent *parent_{nullptr};
-};
-#endif
 
 }  // namespace uartlog
 }  // namespace esphome

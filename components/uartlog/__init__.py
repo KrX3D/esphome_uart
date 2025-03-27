@@ -1,8 +1,8 @@
 import esphome.config_validation as cv
 import esphome.codegen as cg
-from esphome.components import switch
 from esphome.components.logger import LOG_LEVELS, is_log_level
 from esphome.const import CONF_ID
+from esphome import automation
 
 # Configuration keys for our uartlog component.
 CONF_ENABLE_UART_LOG = "enable_uart_log"
@@ -14,9 +14,7 @@ CONF_ALWAYS_FULL_LOGS = "always_full_logs"
 
 uartlog_ns = cg.esphome_ns.namespace('uartlog')
 UartLogComponent = uartlog_ns.class_('UartLogComponent', cg.Component)
-UartLogSwitch = uartlog_ns.class_('UartLogSwitch', switch.Switch, cg.Component)
 
-# The schema for our uartlog component.
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(UartLogComponent),
     cv.Optional(CONF_ENABLE_UART_LOG, default=True): cv.boolean,
@@ -37,7 +35,17 @@ def to_code(config):
     cg.add(var.set_always_full_logs(config[CONF_ALWAYS_FULL_LOGS]))
     yield var
 
-# Define a schema for the custom switch.
-UARTLOG_SWITCH_SCHEMA = cv.Schema({
-    cv.Required(CONF_ID): cv.use_id(UartLogComponent),
+#
+# Register a custom service to set (toggle) the UART logging at runtime.
+#
+UARTLOG_SERVICE_SCHEMA = cv.Schema({
+    cv.GenerateID(): cv.use_id(UartLogComponent),
+    cv.Required("enable"): cv.boolean,
 })
+
+@automation.register_service("uartlog.set_enabled", UARTLOG_SERVICE_SCHEMA, name="Set UART Log Enabled")
+def uartlog_set_enabled_to_code(config, action_id, template_arg, args):
+    parent = yield cg.get_variable(config[cv.GenerateID()])
+    templ = yield cg.templatable(config["enable"], args, cg.bool_)
+    cg.add(parent.set_enable_uart_log(templ))
+    yield
