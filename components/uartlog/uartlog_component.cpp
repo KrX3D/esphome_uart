@@ -9,7 +9,6 @@ namespace esphome {
 namespace uartlog {
 
 
-static const char *TAG = "uartlog_switch.switch";
 static const char *TAG = "uartlog";
 
 void UartLogComponent::setup() {
