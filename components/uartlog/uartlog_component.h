@@ -24,6 +24,7 @@ class UartLogComponent : public switch_::Switch, public Component {
   // Component methods
   void setup() override;
   void loop() override;
+  void update() override;
   float get_setup_priority() const override { return setup_priority::AFTER_WIFI; }
   void dump_config() override;
 
