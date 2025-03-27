@@ -42,10 +42,3 @@ UARTLOG_SERVICE_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.use_id(UartLogComponent),
     cv.Required("enable"): cv.boolean,
 })
-
-@automation.register_service("uartlog.set_enabled", UARTLOG_SERVICE_SCHEMA, name="Set UART Log Enabled")
-def uartlog_set_enabled_to_code(config, action_id, template_arg, args):
-    parent = yield cg.get_variable(config[cv.GenerateID()])
-    templ = yield cg.templatable(config["enable"], args, cg.bool_)
-    cg.add(parent.set_enable_uart_log(templ))
-    yield
