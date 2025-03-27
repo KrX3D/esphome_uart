@@ -63,5 +63,10 @@ void UartLogComponent::log(uint8_t level, const std::string &tag, const std::str
   }
 }
 
+
+void UartLogComponent::dump_config(){
+  ESP_LOGCONFIG(TAG, "Empty custom switch");
+}
+
 }  // namespace uartlog
 }  // namespace esphome
