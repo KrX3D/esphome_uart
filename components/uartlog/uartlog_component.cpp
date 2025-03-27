@@ -26,11 +26,12 @@ void UartLogComponent::setup() {
   this->uart_->begin(this->baud_rate);
 #endif
   // Send an initial message on UART and print to logger.
-  this->uart_->println("##################################");
-  this->uart_->println("##################################");
-  this->uart_->println("##########UART Log started########");
-  this->uart_->println("##################################");
-  this->uart_->println("##################################");
+  this->uart_->println("####################################"
+                     + "####################################"
+                     + "########## UART Log started ########"
+                     + "####################################"
+                     + "####################################"
+  );
   ESP_LOGI(TAG, "UART Log started on TX pin %d with baud %d", this->tx_pin, this->baud_rate);
 
 #ifdef USE_LOGGER
