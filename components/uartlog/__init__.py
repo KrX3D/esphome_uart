@@ -17,10 +17,7 @@ uartlog_ns = cg.esphome_ns.namespace("uartlog")
 
 # Define the main UART log component
 UartLogComponent = uartlog_ns.class_("UartLogComponent", cg.Component)
-# Define the switch class
-UartLogSwitch = uartlog_ns.class_("UartLogSwitch", switch.Switch, cg.Component)
 
-# **Main UART Log Component Schema**
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(UartLogComponent),
     cv.Optional(CONF_ENABLE_UART_LOG, default=True): cv.boolean,
@@ -31,18 +28,10 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_ALWAYS_FULL_LOGS, default=False): cv.boolean,
 }).extend(cv.COMPONENT_SCHEMA)
 
-# **UART Log Switch Schema**
-UARTLOG_SWITCH_SCHEMA = switch.switch_schema(UartLogSwitch).extend({
-    cv.Required(CONF_ID): cv.use_id(UartLogComponent),
-})
-
-# **Async Function to Handle Component**
 async def to_code(config):
-    # Register the main component
-    var = cg.new_Pvariable(config[CONF_ID], UartLogComponent)
-
+    var = cg.new_Pvariable(config[CONF_ID], UartLogComponent)  # FIXED
     await cg.register_component(var, config)
-    
+
     # Set configuration parameters
     cg.add(var.set_enable_uart_log(config[CONF_ENABLE_UART_LOG]))
     cg.add(var.set_baud_rate(config[CONF_BAUD_RATE]))
@@ -50,15 +39,3 @@ async def to_code(config):
     cg.add(var.set_strip_colors(config[CONF_STRIP_COLORS]))
     cg.add(var.set_min_log_level(LOG_LEVELS[config[CONF_MIN_LEVEL]]))
     cg.add(var.set_always_full_logs(config[CONF_ALWAYS_FULL_LOGS]))
-
-# **Async Function for Switch Handling**
-async def uartlog_switch_to_code(config):
-    # Get the parent component (UartLogComponent)
-    parent = await cg.get_variable(config[CONF_ID])
-    
-    # Create a new switch object and attach it to the parent
-    var = await switch.new_switch(config)
-    cg.add(var.set_parent(parent))
-
-    # Register switch as a component
-    await cg.register_component(var, config)
