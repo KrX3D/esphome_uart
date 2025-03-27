@@ -1,10 +1,10 @@
 import esphome.config_validation as cv
 import esphome.codegen as cg
+from esphome.components import switch
 from esphome.components.logger import LOG_LEVELS, is_log_level
 from esphome.const import CONF_ID
-from esphome import automation
 
-# Configuration keys for our uartlog component.
+# Keys for our uartlog component
 CONF_ENABLE_UART_LOG = "enable_uart_log"
 CONF_BAUD_RATE = "baud_rate"
 CONF_TX_PIN = "tx_pin"
@@ -14,6 +14,8 @@ CONF_ALWAYS_FULL_LOGS = "always_full_logs"
 
 uartlog_ns = cg.esphome_ns.namespace('uartlog')
 UartLogComponent = uartlog_ns.class_('UartLogComponent', cg.Component)
+# The custom switch is defined within the component.
+UartLogSwitch = uartlog_ns.class_('UartLogSwitch', switch.Switch, cg.Component)
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(UartLogComponent),
@@ -35,17 +37,15 @@ def to_code(config):
     cg.add(var.set_always_full_logs(config[CONF_ALWAYS_FULL_LOGS]))
     yield var
 
-#
-# Register a custom service to set (toggle) the UART logging at runtime.
-#
-UARTLOG_SERVICE_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.use_id(UartLogComponent),
-    cv.Required("enable"): cv.boolean,
+# Register the custom switch. Since it's defined in the same component, we use its class.
+UARTLOG_SWITCH_SCHEMA = cv.Schema({
+    cv.Required(CONF_ID): cv.use_id(UartLogComponent),
 })
 
-@automation.register_service("uartlog.set_enabled", UARTLOG_SERVICE_SCHEMA, name="Set UART Log Enabled")
-def uartlog_set_enabled_to_code(config, action_id, template_arg, args):
-    parent = yield cg.get_variable(config[cv.GenerateID()])
-    templ = yield cg.templatable(config["enable"], args, cg.bool_)
-    cg.add(parent.set_enable_uart_log(templ))
-    yield
+@switch.register_switch('uartlog_switch', UARTLOG_SWITCH_SCHEMA)
+def uartlog_switch_to_code(config, key, template_args):
+    parent = yield cg.get_variable(config[CONF_ID])
+    # Create a new PVariable for the switch and attach the parent.
+    var = cg.new_Pvariable(config[CONF_ID] + "_switch", parent)
+    cg.add(var.set_parent(parent))
+    yield var
