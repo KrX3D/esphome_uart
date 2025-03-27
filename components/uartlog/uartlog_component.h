@@ -17,7 +17,7 @@
 namespace esphome {
 namespace uartlog {
 
-class UartLogComponent : public Component {
+class UartLogComponent : public switch_::Switch, public Component {
  public:
   UartLogComponent() {}
 
