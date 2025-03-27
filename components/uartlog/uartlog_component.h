@@ -4,7 +4,6 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/defines.h"
-#include "esphome/core/automation.h"
 #ifdef USE_SWITCH
 #include "esphome/components/switch/switch.h"
 #endif
@@ -27,7 +26,7 @@ class UartLogComponent : public Component {
   void loop() override;
   void log(uint8_t level, const std::string &tag, const std::string &payload);
 
-  // Setters for configuration options
+  // Setters to configure the component
   void set_enable_uart_log(bool en) { this->enable_uart_log = en; }
   void set_baud_rate(uint32_t baud_rate) { this->baud_rate = baud_rate; }
   void set_tx_pin(uint8_t tx_pin) { this->tx_pin = tx_pin; }

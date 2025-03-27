@@ -1,11 +1,10 @@
 import esphome.config_validation as cv
 import esphome.codegen as cg
 from esphome.components import switch
-from esphome import automation
 from esphome.components.logger import LOG_LEVELS, is_log_level
 from esphome.const import CONF_ID
 
-# Configuration keys
+# Configuration keys for our uartlog component.
 CONF_ENABLE_UART_LOG = "enable_uart_log"
 CONF_BAUD_RATE = "baud_rate"
 CONF_TX_PIN = "tx_pin"
@@ -17,6 +16,7 @@ uartlog_ns = cg.esphome_ns.namespace('uartlog')
 UartLogComponent = uartlog_ns.class_('UartLogComponent', cg.Component)
 UartLogSwitch = uartlog_ns.class_('UartLogSwitch', switch.Switch, cg.Component)
 
+# The schema for our uartlog component.
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(UartLogComponent),
     cv.Optional(CONF_ENABLE_UART_LOG, default=True): cv.boolean,
@@ -43,8 +43,10 @@ UARTLOG_SWITCH_SCHEMA = cv.Schema({
 })
 
 @switch.register_switch('uartlog_switch', UARTLOG_SWITCH_SCHEMA)
-async def uartlog_switch_to_code(config, key, template_args):
-    parent = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(config[CONF_ID], parent)
+def uartlog_switch_to_code(config, key, template_args):
+    # Get the parent uartlog component.
+    parent = yield cg.get_variable(config[CONF_ID])
+    # Create a new PVariable for the switch. We append a suffix to create a unique id.
+    var = cg.new_Pvariable(config[CONF_ID] + "_switch", parent)
     cg.add(var.set_parent(parent))
-    return var
+    yield var
