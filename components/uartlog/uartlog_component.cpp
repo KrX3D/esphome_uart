@@ -15,9 +15,7 @@ void UartLogComponent::setup() {
     return;
   }
 #ifdef ESP32
-  if (!this->uart_) {
-    // If using USB output, you might have an option like `use_usb` (not shown here)
-    // Otherwise, create a new HardwareSerial instance.
+  if (this->uart_ == nullptr) {
     this->uart_ = new HardwareSerial(1);
     this->uart_->begin(this->baud_rate, SERIAL_8N1, -1, this->tx_pin);
   }
@@ -30,7 +28,6 @@ void UartLogComponent::setup() {
 #ifdef USE_LOGGER
   if (logger::global_logger != nullptr) {
     logger::global_logger->add_on_log_callback([this](int level, const char *tag, const char *message) {
-      // If always_full_logs is true, bypass level filtering.
       if (!this->enable_uart_log)
         return;
       if (!this->always_full_logs && (level > this->min_log_level))
@@ -52,7 +49,7 @@ void UartLogComponent::setup() {
 }
 
 void UartLogComponent::loop() {
-  // Nothing to do.
+  // No periodic tasks needed.
 }
 
 void UartLogComponent::log(uint8_t level, const std::string &tag, const std::string &payload) {
