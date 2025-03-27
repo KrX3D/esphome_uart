@@ -8,6 +8,8 @@
 namespace esphome {
 namespace uartlog {
 
+
+static const char *TAG = "uartlog_switch.switch";
 static const char *TAG = "uartlog";
 
 void UartLogComponent::setup() {
@@ -25,7 +27,11 @@ void UartLogComponent::setup() {
   this->uart_->begin(this->baud_rate);
 #endif
   // Send an initial message on UART and print to logger.
-  this->uart_->println("UART Log started");
+  this->uart_->println("##################################");
+  this->uart_->println("##################################");
+  this->uart_->println("##########UART Log started########");
+  this->uart_->println("##################################");
+  this->uart_->println("##################################");
   ESP_LOGI(TAG, "UART Log started on TX pin %d with baud %d", this->tx_pin, this->baud_rate);
 
 #ifdef USE_LOGGER
