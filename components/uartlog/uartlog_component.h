@@ -4,6 +4,7 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/defines.h"
+#include "esphome/core/log.h"  // ✅ FIXED: Include log.h before using ESP_LOGCONFIG
 #include "esphome/components/switch/switch.h"
 
 #ifdef ESP32
@@ -48,8 +49,7 @@ class UartLogComponent : public Component {
 #endif
 };
 
-// Custom switch to toggle UART logging.
-// This is defined in the same header as the component.
+// ✅ Custom switch to toggle UART logging.
 class UartLogSwitch : public switch_::Switch, public Component {
  public:
   void set_parent(UartLogComponent *parent) { this->parent_ = parent; }
@@ -61,7 +61,7 @@ class UartLogSwitch : public switch_::Switch, public Component {
     publish_state(state);
   }
   void dump_config() override {
-    ESP_LOGCONFIG("uartlog.switch", "UART Log Switch");
+    ESP_LOGCONFIG("uartlog.switch", "UART Log Switch");  // ✅ FIXED: Now log.h is included before use
   }
  protected:
   UartLogComponent *parent_{nullptr};
@@ -70,4 +70,4 @@ class UartLogSwitch : public switch_::Switch, public Component {
 }  // namespace uartlog
 }  // namespace esphome
 
-#endif
+#endif  // UARTLOG_COMPONENT_H_
