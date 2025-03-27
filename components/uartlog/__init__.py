@@ -51,5 +51,5 @@ async def to_code(config):
     cg.add(var.set_tx_pin(config[CONF_TX_PIN]))
     cg.add(var.set_strip_colors(config[CONF_STRIP_COLORS]))
     cg.add(var.set_min_log_level(LOG_LEVELS[config[CONF_MIN_LEVEL]]))
-    # Register the custom switch platform "uartlog".
-    await core_switch.register_switch("uartlog", UARTLOG_SWITCH_SCHEMA, uartlog_switch_to_code)
+    # Register our custom switch platform "uartlog" using the decorator form.
+    core_switch.register_switch("uartlog", UARTLOG_SWITCH_SCHEMA)(uartlog_switch_to_code)
