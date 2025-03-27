@@ -39,7 +39,8 @@ UARTLOG_SWITCH_SCHEMA = switch.switch_schema(UartLogSwitch).extend({
 # **Async Function to Handle Component**
 async def to_code(config):
     # Register the main component
-    var = await cg.new_Pvariable(config[CONF_ID])
+    var = cg.new_Pvariable(config[CONF_ID], UartLogComponent)
+
     await cg.register_component(var, config)
     
     # Set configuration parameters
