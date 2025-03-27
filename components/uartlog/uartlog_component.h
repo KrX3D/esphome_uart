@@ -4,8 +4,9 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/defines.h"
-#include "esphome/core/log.h"  // ✅ FIXED: Include log.h before using ESP_LOGCONFIG
+#ifdef USE_SWITCH
 #include "esphome/components/switch/switch.h"
+#endif
 
 #ifdef ESP32
   #include "HardwareSerial.h"
@@ -25,7 +26,7 @@ class UartLogComponent : public Component {
   void loop() override;
   void log(uint8_t level, const std::string &tag, const std::string &payload);
 
-  // Setters for configuration options
+  // Setters to configure the component
   void set_enable_uart_log(bool en) { this->enable_uart_log = en; }
   void set_baud_rate(uint32_t baud_rate) { this->baud_rate = baud_rate; }
   void set_tx_pin(uint8_t tx_pin) { this->tx_pin = tx_pin; }
@@ -33,11 +34,9 @@ class UartLogComponent : public Component {
   void set_min_log_level(int log_level) { this->min_log_level = log_level; }
   void set_always_full_logs(bool always) { this->always_full_logs = always; }
 
-  // Public so our switch can read its state if desired.
-  bool enable_uart_log{true};
-
  protected:
   bool strip_colors{true};
+  bool enable_uart_log{true};
   bool always_full_logs{false};  // If true, bypass min_level filtering.
   uint32_t baud_rate{115200};
   uint8_t tx_pin{1};
@@ -49,25 +48,22 @@ class UartLogComponent : public Component {
 #endif
 };
 
-// ✅ Custom switch to toggle UART logging.
+#ifdef USE_SWITCH
 class UartLogSwitch : public switch_::Switch, public Component {
  public:
   void set_parent(UartLogComponent *parent) { this->parent_ = parent; }
-  void setup() override { }
   void write_state(bool state) override {
     if (this->parent_ != nullptr) {
       this->parent_->set_enable_uart_log(state);
     }
     publish_state(state);
   }
-  void dump_config() override {
-    ESP_LOGCONFIG("uartlog.switch", "UART Log Switch");  // ✅ FIXED: Now log.h is included before use
-  }
  protected:
   UartLogComponent *parent_{nullptr};
 };
+#endif
 
 }  // namespace uartlog
 }  // namespace esphome
 
-#endif  // UARTLOG_COMPONENT_H_
+#endif
