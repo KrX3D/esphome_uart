@@ -37,14 +37,14 @@ def to_code(config):
     cg.add(var.set_always_full_logs(config[CONF_ALWAYS_FULL_LOGS]))
     yield var
 
-# Define a schema for the custom switch. This switch will let you toggle UART logging.
+# Define a schema for the custom switch.
 UARTLOG_SWITCH_SCHEMA = cv.Schema({
     cv.Required(CONF_ID): cv.use_id(UartLogComponent),
 })
 
 @switch.register_switch('uartlog_switch', UARTLOG_SWITCH_SCHEMA)
-def uartlog_switch_to_code(config):
-    parent = yield cg.get_variable(config[CONF_ID])
+async def uartlog_switch_to_code(config, key, template_args):
+    parent = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(config[CONF_ID], parent)
     cg.add(var.set_parent(parent))
-    yield var
+    return var
