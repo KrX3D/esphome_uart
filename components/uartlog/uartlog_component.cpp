@@ -62,9 +62,16 @@ void UartLogComponent::log(uint8_t level, const std::string &tag, const std::str
 
   // Use regex to remove the second occurrence of brackets and its content
   std::regex bracket_regex(R"(\[[^\]]*\])");  // Matches anything inside square brackets
+  std::smatch match;
 
-  if (std::regex_search(clean_payload, bracket_regex)) {
+  if (std::regex_search(clean_payload, match, bracket_regex)) {
     clean_payload = std::regex_replace(clean_payload, bracket_regex, "", std::regex_constants::format_first_only);
+  }
+
+  // Ensure there is no extra space left from the removal
+  size_t first_char = clean_payload.find_first_not_of(" ");
+  if (first_char != std::string::npos) {
+    clean_payload = clean_payload.substr(first_char);
   }
 
   // Format the log message.
