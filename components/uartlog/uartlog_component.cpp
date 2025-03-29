@@ -60,21 +60,26 @@ void UartLogComponent::log(uint8_t level, const std::string &tag, const std::str
 
   std::string clean_payload = payload;  // Copy payload since it's const
 
-  // Use regex to remove the second occurrence of brackets and its content
-  std::regex bracket_regex(R"(\[[^\]]*\])");  // Matches anything inside square brackets
-  std::smatch match;
-
-  if (std::regex_search(clean_payload, match, bracket_regex)) {
-    clean_payload = std::regex_replace(clean_payload, bracket_regex, "", std::regex_constants::format_first_only);
+  // Find and remove the second occurrence of [ ... ]
+  size_t first_bracket = clean_payload.find('[');
+  if (first_bracket != std::string::npos) {
+    size_t second_bracket = clean_payload.find('[', first_bracket + 1);
+    if (second_bracket != std::string::npos) {
+      size_t closing_bracket = clean_payload.find(']', second_bracket);
+      if (closing_bracket != std::string::npos) {
+        // Remove the second [ ... ] completely
+        clean_payload.erase(second_bracket, closing_bracket - second_bracket + 1);
+      }
+    }
   }
 
-  // Ensure there is no extra space left from the removal
+  // Trim any extra spaces left after removal
   size_t first_char = clean_payload.find_first_not_of(" ");
   if (first_char != std::string::npos) {
     clean_payload = clean_payload.substr(first_char);
   }
 
-  // Format the log message.
+  // Format the log message
   std::string out = "[" + tag + "] " + clean_payload;
 
   if (this->uart_ != nullptr) {
