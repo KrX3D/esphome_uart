@@ -57,7 +57,8 @@ void UartLogComponent::log(uint8_t level, const std::string &tag, const std::str
   if (!this->enable_uart_log)
     return;
   // Format the log message.
-  std::string out = "[" + tag + "] " + payload;
+  //std::string out = "[" + tag + "] " + payload;
+  std::string out = payload;
   if (this->uart_ != nullptr) {
     this->uart_->println(out.c_str());
   }
