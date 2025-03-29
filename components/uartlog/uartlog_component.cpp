@@ -69,6 +69,11 @@ void UartLogComponent::log(uint8_t level, const std::string &tag, const std::str
       if (closing_bracket != std::string::npos) {
         // Remove the second [ ... ] completely
         clean_payload.erase(second_bracket, closing_bracket - second_bracket + 1);
+
+        // Remove an optional ":" if it appears right after the second bracket
+        if (clean_payload[second_bracket] == ':') {
+          clean_payload.erase(second_bracket, 1);
+        }
       }
     }
   }
