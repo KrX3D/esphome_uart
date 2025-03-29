@@ -1,5 +1,6 @@
 #include "uartlog_component.h"
 #include "esphome/core/log.h"
+#include <regex>
 
 #ifdef USE_LOGGER
 #include "esphome/components/logger/logger.h"
@@ -56,9 +57,17 @@ void UartLogComponent::loop() {
 void UartLogComponent::log(uint8_t level, const std::string &tag, const std::string &payload) {
   if (!this->enable_uart_log)
     return;
-  // Format the log message.
-  //std::string out = "[" + tag + "] " + payload;
+
   std::string out = payload;
+
+  // Use regex to remove the second occurrence of brackets and its content
+  std::regex bracket_regex(R"(\[[^\]]*\])");  // Matches anything inside square brackets
+  std::smatch match;
+
+  if (std::regex_search(out, match, bracket_regex)) {
+    out = std::regex_replace(out, bracket_regex, "", std::regex_constants::format_first_only);
+  }
+
   if (this->uart_ != nullptr) {
     this->uart_->println(out.c_str());
   }
