@@ -58,15 +58,17 @@ void UartLogComponent::log(uint8_t level, const std::string &tag, const std::str
   if (!this->enable_uart_log)
     return;
 
-  std::string out = payload;
+  std::string clean_payload = payload;  // Copy payload since it's const
 
   // Use regex to remove the second occurrence of brackets and its content
   std::regex bracket_regex(R"(\[[^\]]*\])");  // Matches anything inside square brackets
-  std::smatch match;
 
-  if (std::regex_search(out, match, bracket_regex)) {
-    out = std::regex_replace(out, bracket_regex, "", std::regex_constants::format_first_only);
+  if (std::regex_search(clean_payload, bracket_regex)) {
+    clean_payload = std::regex_replace(clean_payload, bracket_regex, "", std::regex_constants::format_first_only);
   }
+
+  // Format the log message.
+  std::string out = "[" + tag + "] " + clean_payload;
 
   if (this->uart_ != nullptr) {
     this->uart_->println(out.c_str());
