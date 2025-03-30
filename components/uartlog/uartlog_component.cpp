@@ -14,6 +14,7 @@ static const char *TAG = "uartlog";
 void UartLogComponent::setup() {
   if (!this->enable_uart_log) {
     ESP_LOGI(TAG, "UART log disabled");
+  this->uart_->println("============================= UART log disabled =============================");
     return;
   }
 #ifdef ESP32
@@ -26,8 +27,14 @@ void UartLogComponent::setup() {
   this->uart_->begin(this->baud_rate);
 #endif
   // Send an initial message on UART and print to logger.
-  this->uart_->println("UART Log started");
-  ESP_LOGI(TAG, "UART Log started on TX pin %d with baud %d", this->tx_pin, this->baud_rate);
+  this->uart_->println("============================= UART log started =============================");
+
+  // Format the ESP_LOGI message and send it to UART
+  std::string log_message = "UART log started on TX pin " + std::to_string(this->tx_pin) + 
+                            " with baud " + std::to_string(this->baud_rate);
+  this->uart_->println(log_message.c_str());
+  
+  ESP_LOGI(TAG, "UART log started on TX pin %d with baud %d", this->tx_pin, this->baud_rate);
 
 #ifdef USE_LOGGER
   if (logger::global_logger != nullptr) {
