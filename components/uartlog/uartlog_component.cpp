@@ -1,6 +1,7 @@
 #include "uartlog_component.h"
 #include "esphome/core/log.h"
 #include <regex>
+#include <cstring>
 
 #ifdef USE_LOGGER
 #include "esphome/components/logger/logger.h"
@@ -11,10 +12,31 @@ namespace uartlog {
 
 static const char *TAG = "uartlog";
 
+#ifdef USE_LOGGER
+// ESPHome 2026.x replaced add_on_log_callback(std::function) with
+// add_log_callback(instance, fn-pointer, message_len). Pick whichever the logger has.
+template<typename L>
+static auto register_log_callback(L *logger, UartLogComponent *self, int)
+    -> decltype(logger->add_log_callback(nullptr, nullptr), void()) {
+  logger->add_log_callback(self, [](void *s, uint8_t level, const char *tag, const char *message, size_t len) {
+    static_cast<UartLogComponent *>(s)->on_logger_message(level, tag, message, len);
+  });
+}
+
+template<typename L>
+static void register_log_callback(L *logger, UartLogComponent *self, long) {
+  logger->add_on_log_callback([self](int level, const char *tag, const char *message) {
+    self->on_logger_message(level, tag, message, strlen(message));
+  });
+}
+#endif
+
 void UartLogComponent::setup() {
   if (!this->enable_uart_log) {
     ESP_LOGI(TAG, "UART log disabled");
-  this->uart_->println("============================= UART log disabled =============================");
+    // uart_ is not created yet on ESP32 when logging is disabled
+    if (this->uart_ != nullptr)
+      this->uart_->println("============================= UART log disabled =============================");
     return;
   }
 #ifdef ESP32
@@ -38,23 +60,19 @@ void UartLogComponent::setup() {
 
 #ifdef USE_LOGGER
   if (logger::global_logger != nullptr) {
-    logger::global_logger->add_on_log_callback([this](int level, const char *tag, const char *message) {
-      if (!this->enable_uart_log || (level > this->min_log_level))
-        return;
-      std::string final_message;
-      if (this->strip_colors) {
-        std::string org_msg(message);
-        if (org_msg.size() > 11)
-          final_message = org_msg.substr(7, org_msg.size() - 11);
-        else
-          final_message = org_msg;
-      } else {
-        final_message = message;
-      }
-      this->log(level, tag, final_message);
-    });
+    register_log_callback(logger::global_logger, this, 0);
   }
 #endif
+}
+
+void UartLogComponent::on_logger_message(uint8_t level, const char *tag, const char *message, size_t message_len) {
+  if (!this->enable_uart_log || (level > this->min_log_level))
+    return;
+  std::string final_message(message, message_len);
+  // Strip "\033[0;xxm" (7 chars) at the start and "\033[0m" (4 chars) at the end
+  if (this->strip_colors && final_message.size() > 11 && final_message[0] == '\033')
+    final_message = final_message.substr(7, final_message.size() - 11);
+  this->log(level, tag, final_message);
 }
 
 void UartLogComponent::loop() {
