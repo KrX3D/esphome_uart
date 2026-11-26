@@ -6,11 +6,19 @@
 #include "esphome/core/defines.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/log.h"
+#include "esphome/core/version.h"
 
 #ifdef ESP32
   #include "HardwareSerial.h"
 #elif defined(ESP8266)
   #include <Arduino.h>   // For Serial1 on ESP8266 (note: TX pin is fixed)
+#endif
+
+// ESPHome 2025.11.0 changed Action::play(Ts... x) to play(const Ts &...x)
+#if ESPHOME_VERSION_CODE >= VERSION_CODE(2025, 11, 0)
+#define UARTLOG_PLAY_ARGS const Ts &...x
+#else
+#define UARTLOG_PLAY_ARGS Ts... x
 #endif
 
 namespace esphome {
@@ -35,6 +43,9 @@ class UartLogComponent : public Component {
   // The log function that outputs via UART
   void log(uint8_t level, const std::string &tag, const std::string &payload);
 
+  // Handles a message received from the ESPHome logger
+  void on_logger_message(uint8_t level, const char *tag, const char *message, size_t message_len);
+
  protected:
   bool strip_colors{true};
   bool enable_uart_log{true};
@@ -57,7 +68,7 @@ template<typename... Ts> class UartLogAction : public Action<Ts...> {
   TEMPLATABLE_VALUE(std::string, tag)
   TEMPLATABLE_VALUE(std::string, payload)
 
-  void play(Ts... x) override {
+  void play(UARTLOG_PLAY_ARGS) override {
     this->parent_->log(this->level_.value(x...), this->tag_.value(x...), this->payload_.value(x...));
   }
 

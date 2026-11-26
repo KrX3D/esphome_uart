@@ -1,7 +1,20 @@
 import esphome.config_validation as cv
 import esphome.codegen as cg
 from esphome import automation
+from esphome.components import logger
 from esphome.components.logger import LOG_LEVELS, is_log_level
+
+# ESPHome 2026.x: log callbacks need a reserved listener slot
+_request_log_listener = getattr(logger, "request_log_listener", None)
+
+
+def _register_action(name, action_type, schema):
+    # uartlog.log finishes inside play(), so it is synchronous.
+    # Older ESPHome versions do not know the synchronous= parameter.
+    try:
+        return automation.register_action(name, action_type, schema, synchronous=True)
+    except TypeError:
+        return automation.register_action(name, action_type, schema)
 
 # These names are not defined in the core so we use literal strings.
 CONF_BAUD_RATE = "baud_rate"
@@ -39,13 +52,15 @@ UARTLOG_LOG_ACTION_SCHEMA = cv.Schema({
 def to_code(config):
     var = cg.new_Pvariable(config[cv.GenerateID()])
     yield cg.register_component(var, config)
+    if _request_log_listener is not None:
+        _request_log_listener()
     cg.add(var.set_enable_uart_log(config[CONF_ENABLE_UART_LOG]))
     cg.add(var.set_baud_rate(config[CONF_BAUD_RATE]))
     cg.add(var.set_tx_pin(config[CONF_TX_PIN]))
     cg.add(var.set_strip_colors(config[CONF_STRIP_COLORS]))
     cg.add(var.set_min_log_level(LOG_LEVELS[config[CONF_MIN_LEVEL]]))
 
-@automation.register_action('uartlog.log', UartLogAction, UARTLOG_LOG_ACTION_SCHEMA)
+@_register_action('uartlog.log', UartLogAction, UARTLOG_LOG_ACTION_SCHEMA)
 def uartlog_log_action_to_code(config, action_id, template_arg, args):
     parent = yield cg.get_variable(config[cv.GenerateID()])
     var = cg.new_Pvariable(action_id, template_arg, parent)
